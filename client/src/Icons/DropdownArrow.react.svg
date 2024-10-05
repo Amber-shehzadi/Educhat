@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="17.422" height="17.5" viewBox="0 0 17.422 17.5">
+  <defs>
+    <path id="path-1" fill-rule="evenodd" d="M8.71124302 12.39583333c-.36732408 0-.71867755-.16989583-.96259236-.468125L4.69027843 8.21041667c-.3658722-.44552084-.43919184-1.07770834-.18801766-1.6121875.22141076-.47177084.66205447-.76489584 1.15061001-.76489584h6.11674447c.48855555 0 .92919926.293125 1.15061002.76489584.25117417.53447916.17785454 1.16666666-.18729173 1.61145833l-3.05909817 3.71802083c-.2439148.29822917-.59526827.468125-.96259235.468125"/>
+    <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="userSpaceOnUse">
+      <rect width="17.422" height="17.5" x="0" y="0" fill="black"/>
+      <use fill="white" xlink:href="#path-1"/>
+    </mask>
+  </defs>
+  <g>
+    <use fill="rgb(85,85,85)" xlink:href="#path-1"/>
+    <g mask="url(#mask-2)"/>
+  </g>
+</svg>
