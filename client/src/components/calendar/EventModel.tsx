@@ -163,7 +163,7 @@ const EventModel: FC<Props> = ({ eventInfo, queryLoad }) => {
         trigger="click"
       >
         <div
-          className="p-1 bg-blue-500/60 w-full rounded-sm flex items-center justify-between"
+          className="p-1 bg-purple-900/60 w-full rounded-sm flex items-center justify-between"
           onClick={() => setOpenPopover(true)}
         >
           <div className="text-white font-medium truncate">

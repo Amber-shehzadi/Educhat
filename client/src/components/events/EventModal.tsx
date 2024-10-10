@@ -180,6 +180,7 @@ const EventModal: FC<Props> = ({
                 placeholder="Start Date *"
                 format={allDay ? "YYYY-MM-DD" : "YYYY-MM-DD hh:mm A"}
                 use12Hours={true}
+          
               />
             </Form.Item>
             <Form.Item

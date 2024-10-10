@@ -92,7 +92,7 @@ const Navbar = ({ user }: any) => {
       key: "1",
       label: (
         <Link to={"/profile"}>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center  gap-2">
             <UserOutlined />
             Manage Account
           </div>
@@ -102,7 +102,7 @@ const Navbar = ({ user }: any) => {
     {
       key: "2",
       label: (
-        <div className="flex items-center gap-2" onClick={handleLogout}>
+        <div className="flex items-center gap-2  text-red-600 " onClick={handleLogout}>
           {isLoading ? <LoadingOutlined /> : <FiLogOut />}
           {isLoading ? "Logging out ..." : "Logout"}
         </div>
@@ -128,8 +128,8 @@ const Navbar = ({ user }: any) => {
         className="sticky top-0 w-100 z-50 shadow-md"
       >
         <div className="shadow-sm h-full flex items-center justify-between px-8">
-          <Link className="text-bold text-blue-500 !hover:text" to="/">
-          <strong>EDU CHAT</strong>
+          <Link className="text-bold text-purple-950 !hover:text" to="/">
+         <strong>EDU CHAT</strong>
           </Link>
           <div className="flex items-center gap-6">
             {/* <Input

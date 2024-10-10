@@ -111,7 +111,7 @@ const SignUp = () => {
                   ]}
                 >
                   <Input.Password
-                    className="rounded-full"
+                    className="rounded-full custom-input "
                     placeholder="Password"
                     size="large"
                     iconRender={(visible) =>
@@ -121,7 +121,7 @@ const SignUp = () => {
                 </Form.Item>
 
                 <Form.Item>
-                  <Button className="custom-button"
+                  <Button className="custom-button w-full"
                     htmlType="submit"
                     size="large"
                     shape="round"

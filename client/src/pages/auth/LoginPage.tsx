@@ -110,7 +110,7 @@ const Login = () => {
                 </Form.Item>
 
                 <Form.Item>
-                <Button className="custom-button"
+                <Button className="custom-button w-full"
                     htmlType="submit"
                     size="large"
                     shape="round"
