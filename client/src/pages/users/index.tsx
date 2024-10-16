@@ -4,46 +4,91 @@ import {
   EllipsisOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { Button, Card, Dropdown, List, Popconfirm, Tabs } from "antd";
-import React, { useEffect, useState } from "react";
+import {
+  Button,
+  Card,
+  Dropdown,
+  Input,
+  List,
+  MenuProps,
+  message,
+  Popconfirm,
+  Tabs,
+  Tooltip,
+} from "antd";
+import React, { useEffect, useMemo, useState } from "react";
 import FacultyModal from "../../components/users/FacultyModal";
 import TeacherStudent from "../../components/users/TeacherStudent";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaSearch } from "react-icons/fa";
 import moment from "moment";
 import {
- useLazyGetAllfacultiesQuery,
- useLazyGetAllStudentsQuery,
- useLazyGetAllteachersQuery,
+  useLazyGetAllfacultiesQuery,
+  useLazyGetAllStudentsQuery,
+  useLazyGetAllteachersQuery,
+  useUpdateRoleMutation,
 } from "../../redux/user/userAPI";
 import { useSelector } from "react-redux";
+import TeahcerViewModal from "../../components/users/TeahcerViewModal";
 
 const Users = () => {
-  const { user} = useSelector((state: any) => state.auth);
+  const roleItems: MenuProps["items"] = [
+    {
+      key: "admin",
+      label: "Admin",
+    },
+    {
+      key: "teacher",
+      label: "Teacher",
+    },
+    {
+      key: "coordinator",
+      label: "Coordinator",
+    },
+    {
+      key: "student",
+      label: "Student",
+    },
+  ];
+
+  const { user } = useSelector((state: any) => state.auth);
+  const [messageApi, contextHolder] = message.useMessage();
+  const [isEditModal, setIsEditModal] = useState(false);
+  const [feedBackModal, setfeedBackModal] = useState(false);
+  const [editData, setEditData] = useState({} as any);
+
   const [getAllFaculties, { isLoading }] = useLazyGetAllfacultiesQuery();
+  const [
+    updateUserRole,
+    { isLoading: roleLoading, isSuccess, isError, error, data: roleData },
+  ] = useUpdateRoleMutation();
 
   const [getAllTeachers, { isLoading: teacherLoading }] =
     useLazyGetAllteachersQuery();
   const [getAllStudents, { isLoading: studentLoading }] =
     useLazyGetAllStudentsQuery();
-  const [selectedTab, setSelectedTab] = useState(user.role==="coordinator"?"student":"coordinator");
+  const [selectedTab, setSelectedTab] = useState(
+    user.role === "coordinator" ? "student" : "coordinator"
+  );
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [data, setData] = useState([] as any);
-  const [editData, serEditData] = useState({} as any);
+  const [users, setUsers] = useState([]);
 
   const handleGETFaculties = async () => {
     const { data } = await getAllFaculties({});
     if (data?.status) {
       setData(data?.faculties);
+      setUsers(data?.faculties);
     }
   };
-  useEffect(() => {
+  useMemo(() => {
     handleGETFaculties();
-  }, [getAllFaculties]);
+  }, []);
 
   const handleGetAllTeachers = async () => {
     const { data } = await getAllTeachers({});
     if (data?.status) {
       setData(data?.teachers);
+      setUsers(data?.teachers);
     }
   };
 
@@ -51,11 +96,13 @@ const Users = () => {
     const { data } = await getAllStudents({});
     if (data?.status) {
       setData(data?.students);
+      setUsers(data?.students);
     }
   };
 
   const handleChnageTab = (e: string) => {
     setData([]);
+    setUsers([]);
     setIsOpenModal(false);
     setSelectedTab(e);
     if (e === "student") {
@@ -65,6 +112,23 @@ const Users = () => {
       return handleGETFaculties();
     }
     return handleGetAllTeachers();
+  };
+
+  const handleFilterUser = (searchText: string) => {
+    const filtered = data.filter(
+      (item: any) =>
+        item.name.toLowerCase().includes(searchText) ||
+        item.email.toLowerCase().includes(searchText) ||
+        item.cnic.toLowerCase().includes(searchText) ||
+        item.contact.toLowerCase().includes(searchText)
+    );
+
+    setUsers(filtered);
+  };
+
+  const viewData = async (items: any) => {
+    setEditData(items);
+    setfeedBackModal(true);
   };
 
   const items = [
@@ -79,8 +143,8 @@ const Users = () => {
             sm: 2,
             lg: 3,
           }}
-          dataSource={data}
-          loading={isLoading}
+          dataSource={users}
+          loading={isLoading || roleLoading}
           renderItem={(item: any) => {
             return (
               <List.Item>
@@ -90,23 +154,36 @@ const Users = () => {
                   hoverable
                   className="max-w-xs"
                   actions={[
-                    <EditOutlined
-                      key="edit"
-                      // onClick={() => handleEditTodo(item)}
-                    />,
-                    <Popconfirm
-                      title="Delete the task"
-                      description="Are you sure to delete this task?"
-                      // onConfirm={() => handleDeleteTodo(item?._id as string)}
-                      okText="Yes"
-                      cancelText="No"
+                    // <EditOutlined
+                    //   key="edit"
+                    //   onClick={() => handleEditCoordinator(item)}
+                    // />,
+                    // <Popconfirm
+                    //   title="Delete the task"
+                    //   description="Are you sure to delete this task?"
+                    //   // onConfirm={() => handleDeleteTodo(item?._id as string)}
+                    //   okText="Yes"
+                    //   cancelText="No"
+                    // >
+                    //   <DeleteOutlined key="delete" />
+                    // </Popconfirm>,
+                    // <EyeOutlined
+                    //   key="view"
+                    //   // onClick={() => handleOpenViewModal(item)}
+                    // />,
+                    <Dropdown
+                      menu={{
+                        items: roleItems,
+                        onClick: ({ key }) =>
+                          handleUpdateRole(key, item?._id as string),
+                        selectedKeys: [item?.role as string],
+                      }}
+                      trigger={["click"]}
+                      key="ellipsis"
                     >
-                      <DeleteOutlined key="delete" />
-                    </Popconfirm>,
-                    <EyeOutlined
-                      key="view"
-                      // onClick={() => handleOpenViewModal(item)}
-                    />,
+                      {/* <EllipsisOutlined /> */}
+                      <span>Role</span>
+                    </Dropdown>,
                   ]}
                 >
                   <div className="w-full">
@@ -145,9 +222,10 @@ const Users = () => {
             sm: 2,
             lg: 3,
           }}
-          dataSource={data}
+          dataSource={users}
           loading={teacherLoading}
           renderItem={(item: any) => {
+            console.log(item, "role");
             return (
               <List.Item>
                 <Card
@@ -156,34 +234,32 @@ const Users = () => {
                   hoverable
                   className="max-w-xs"
                   actions={[
-                    <EditOutlined
-                      key="edit"
-                      // onClick={() => handleEditTodo(item)}
-                    />,
-                    <Popconfirm
-                      title="Delete the task"
-                      description="Are you sure to delete this task?"
-                      // onConfirm={() => handleDeleteTodo(item?._id as string)}
-                      okText="Yes"
-                      cancelText="No"
-                    >
-                      <DeleteOutlined key="delete" />
-                    </Popconfirm>,
-                    <EyeOutlined
-                      key="view"
-                      // onClick={() => handleOpenViewModal(item)}
-                    />,
+                    // <EditOutlined
+                    //   key="edit"
+                    //   // onClick={() => handleEditTodo(item)}
+                    // />,
+                    // <Popconfirm
+                    //   title="Delete the task"
+                    //   description="Are you sure to delete this task?"
+                    //   // onConfirm={() => handleDeleteTodo(item?._id as string)}
+                    //   okText="Yes"
+                    //   cancelText="No"
+                    // >
+                    //   <DeleteOutlined key="delete" />
+                    // </Popconfirm>,
+                    <EyeOutlined key="view" onClick={() => viewData(item)} />,
                     <Dropdown
                       menu={{
-                        items,
-                        //   onClick: ({ key }) =>
-                        //     handleOnStatusChnaged(key, item?._id as string),
-                        //   selectedKeys: [item?.status as string],
+                        items: roleItems,
+                        onClick: ({ key }) =>
+                          handleUpdateRole(key, item?._id as string),
+                        selectedKeys: [item?.role as string],
                       }}
                       trigger={["click"]}
                       key="ellipsis"
                     >
-                      <EllipsisOutlined />
+                      {/* <EllipsisOutlined /> */}
+                      <span>Role</span>
                     </Dropdown>,
                   ]}
                 >
@@ -235,7 +311,7 @@ const Users = () => {
             sm: 2,
             lg: 3,
           }}
-          dataSource={data}
+          dataSource={users}
           loading={studentLoading}
           renderItem={(item: any) => {
             return (
@@ -246,34 +322,35 @@ const Users = () => {
                   hoverable
                   className="max-w-xs"
                   actions={[
-                    <EditOutlined
-                      key="edit"
-                      // onClick={() => handleEditTodo(item)}
-                    />,
-                    <Popconfirm
-                      title="Delete the task"
-                      description="Are you sure to delete this task?"
-                      // onConfirm={() => handleDeleteTodo(item?._id as string)}
-                      okText="Yes"
-                      cancelText="No"
-                    >
-                      <DeleteOutlined key="delete" />
-                    </Popconfirm>,
-                    <EyeOutlined
-                      key="view"
-                      // onClick={() => handleOpenViewModal(item)}
-                    />,
+                    // <EditOutlined
+                    //   key="edit"
+                    //   // onClick={() => handleEditTodo(item)}
+                    // />,
+                    // <Popconfirm
+                    //   title="Delete the task"
+                    //   description="Are you sure to delete this task?"
+                    //   // onConfirm={() => handleDeleteTodo(item?._id as string)}
+                    //   okText="Yes"
+                    //   cancelText="No"
+                    // >
+                    //   <DeleteOutlined key="delete" />
+                    // </Popconfirm>,
+                    // <EyeOutlined
+                    //   key="view"
+                    //   // onClick={() => handleOpenViewModal(item)}
+                    // />,
                     <Dropdown
                       menu={{
-                        items,
-                        //   onClick: ({ key }) =>
-                        //     handleOnStatusChnaged(key, item?._id as string),
-                        //   selectedKeys: [item?.status as string],
+                        items: roleItems,
+                        onClick: ({ key }) =>
+                          handleUpdateRole(key, item?._id as string),
+                        selectedKeys: [item?.role as string],
                       }}
                       trigger={["click"]}
                       key="ellipsis"
                     >
-                      <EllipsisOutlined />
+                      {/* <EllipsisOutlined /> */}
+                      <span>Role</span>
                     </Dropdown>,
                   ]}
                 >
@@ -328,7 +405,7 @@ const Users = () => {
             sm: 2,
             lg: 3,
           }}
-          dataSource={data}
+          dataSource={users}
           loading={studentLoading}
           renderItem={(item: any) => {
             return (
@@ -338,37 +415,25 @@ const Users = () => {
                   title={item?.title}
                   hoverable
                   className="max-w-xs"
-                  actions={[
-                    <EditOutlined
-                      key="edit"
-                      // onClick={() => handleEditTodo(item)}
-                    />,
-                    <Popconfirm
-                      title="Delete the task"
-                      description="Are you sure to delete this task?"
-                      // onConfirm={() => handleDeleteTodo(item?._id as string)}
-                      okText="Yes"
-                      cancelText="No"
-                    >
-                      <DeleteOutlined key="delete" />
-                    </Popconfirm>,
-                    <EyeOutlined
-                      key="view"
-                      // onClick={() => handleOpenViewModal(item)}
-                    />,
-                    <Dropdown
-                      menu={{
-                        items,
-                        //   onClick: ({ key }) =>
-                        //     handleOnStatusChnaged(key, item?._id as string),
-                        //   selectedKeys: [item?.status as string],
-                      }}
-                      trigger={["click"]}
-                      key="ellipsis"
-                    >
-                      <EllipsisOutlined />
-                    </Dropdown>,
-                  ]}
+                  // actions={[
+                  //   <EditOutlined
+                  //     key="edit"
+                  //     // onClick={() => handleEditTodo(item)}
+                  //   />,
+                  //   <Popconfirm
+                  //     title="Delete the task"
+                  //     description="Are you sure to delete this task?"
+                  //     // onConfirm={() => handleDeleteTodo(item?._id as string)}
+                  //     okText="Yes"
+                  //     cancelText="No"
+                  //   >
+                  //     <DeleteOutlined key="delete" />
+                  //   </Popconfirm>,
+                  //   <EyeOutlined
+                  //     key="view"
+                  //     // onClick={() => handleOpenViewModal(item)}
+                  //   />,
+                  // ]}
                 >
                   <div className="w-full">
                     <div className="flex items-center justify-start gap-2 my-2">
@@ -408,33 +473,82 @@ const Users = () => {
       ),
     },
   ];
+
+  const handleUpdateRole = async (role: string, userId: string) => {
+    await updateUserRole({ userId, role });
+  };
+  useEffect(() => {
+    if (isSuccess) {
+      const message = roleData?.message || "";
+      messageApi.open({
+        type: "success",
+        content: message,
+      });
+      if (selectedTab === "student") {
+        handleGetAllStudents();
+        return;
+      }
+      if (selectedTab === "coordinator") {
+        handleGETFaculties();
+        return;
+      }
+      handleGetAllTeachers();
+      return;
+    }
+    if (isError) {
+      const errordata: any = error;
+      messageApi.open({
+        type: "error",
+        content: errordata.data.message,
+      });
+    }
+  }, [isSuccess, error, roleData, messageApi, isError]);
+
   return (
     <>
+      {contextHolder}
       <div className="p-4">
         <Tabs
           tabBarExtraContent={
-            <Button className="custom-button capitalize"
-              shape="round"
-              icon={<FaPlus />}
-              onClick={() => setIsOpenModal(true)}
-            >
-              {`Add ${selectedTab}`}
-            </Button>
+            <div className="flex items-center justify-center flex-col md:flex-row gap-3">
+              <Input
+                type="text"
+                onChange={(e) => handleFilterUser(e.target.value)}
+                className="rounded-full"
+                placeholder="Search"
+                suffix={
+                  <Tooltip title="Search user">
+                    <FaSearch style={{ color: "rgba(0,0,0,.45)" }} />
+                  </Tooltip>
+                }
+              />
+              <Button
+                className="custom-button capitalize"
+                shape="round"
+                icon={<FaPlus />}
+                onClick={() => setIsOpenModal(true)}
+              >
+                {`Add ${selectedTab}`}
+              </Button>
+            </div>
           }
-          items={user?.role==="coordinator"?coordinatorItems:items}
+          items={user?.role === "coordinator" ? coordinatorItems : items}
           onChange={handleChnageTab}
         />
       </div>
       {isOpenModal &&
         (selectedTab === "coordinator" ? (
-          //@ts-ignore
-          <FacultyModal       
+          <FacultyModal
             isModalOpen={isOpenModal}
             setIsModalOpen={setIsOpenModal}
             loadQuery={handleGETFaculties}
+            setIsEditModal={setIsEditModal}
+            isEditModal={isEditModal}
+            editData={editData}
+            setEditData={setEditData}
           />
         ) : (
-          //@ts-ignore
+          //@ts-expect-error state
           <TeacherStudent
             isModalOpen={isOpenModal}
             setIsModalOpen={setIsOpenModal}
@@ -446,6 +560,14 @@ const Users = () => {
             }
           />
         ))}
+
+      {feedBackModal && (
+        <TeahcerViewModal
+          isModalOpen={feedBackModal}
+          setIsModalOpen={setfeedBackModal}
+          viewData={editData}
+        />
+      )}
     </>
   );
 };

@@ -1,6 +1,9 @@
 import { Form, Input, message, Modal } from "antd";
 import React, { Dispatch, FC, SetStateAction, useEffect } from "react";
-import { useCreateFacultyMutation } from "../../redux/user/userAPI";
+import {
+  useCreateFacultyMutation,
+  useUpdateFacultyMutation,
+} from "../../redux/user/userAPI";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 
 type Props = {
@@ -27,6 +30,16 @@ const FacultyModal: FC<Props> = ({
 
   const [createFaculty, { isLoading, data, isError, error, isSuccess }] =
     useCreateFacultyMutation();
+  const [
+    updatefaculty,
+    {
+      isLoading: updateLoading,
+      data: updateData,
+      isError: updateIsError,
+      error: updateError,
+      isSuccess: updateIsSuccess,
+    },
+  ] = useUpdateFacultyMutation();
 
   const handleOk = () => {
     form.submit();
@@ -34,10 +47,15 @@ const FacultyModal: FC<Props> = ({
 
   const handleCancel = () => {
     setIsModalOpen(false);
+    setEditData({});
+    setIsEditModal(false);
   };
 
   const onFinish = async (values: any) => {
-    await createFaculty({ ...values });
+    if (isEditModal) {
+      return updatefaculty({ id: editData?._id, ...values });
+    }
+    return await createFaculty({ ...values });
   };
 
   useEffect(() => {
@@ -68,6 +86,44 @@ const FacultyModal: FC<Props> = ({
     setIsModalOpen,
     setIsEditModal,
   ]);
+
+  useEffect(() => {
+    if (updateIsSuccess) {
+      const message = updateData?.message || "";
+      messageApi.open({
+        type: "success",
+        content: message,
+      });
+      form.resetFields();
+      setIsModalOpen(false);
+      loadQuery();
+    }
+    if (updateIsError) {
+      const errordata: any = updateError;
+      messageApi.open({
+        type: "error",
+        content: errordata.data.message,
+      });
+    }
+  }, [
+    updateIsSuccess,
+    updateError,
+    updateData,
+    messageApi,
+    form,
+    updateIsError,
+    setIsModalOpen,
+    setIsEditModal,
+  ]);
+
+  console.log(editData, "edit data");
+  useEffect(() => {
+    form.setFieldsValue({
+      name: editData?.name,
+      email: editData?.email,
+    });
+  }, [editData, form]);
+
   return (
     <>
       {contextHolder}
@@ -78,10 +134,10 @@ const FacultyModal: FC<Props> = ({
         okText={isEditModal ? "Update" : "Submit"}
         onCancel={handleCancel}
         okButtonProps={{
-          loading: isLoading,
-          disabled: isLoading,
+          loading: isLoading || updateLoading,
+          disabled: isLoading || updateLoading,
         }}
-        cancelButtonProps={{ disabled: isLoading }}
+        cancelButtonProps={{ disabled: isLoading || updateLoading }}
         centered
       >
         <div className="my-4 text-center">
@@ -116,7 +172,7 @@ const FacultyModal: FC<Props> = ({
             name="password"
             rules={[
               {
-                required: true,
+                required: !isEditModal,
                 message: "Please input password!",
               },
               { min: 8, message: "Password must be 8 characters long" },
@@ -125,7 +181,6 @@ const FacultyModal: FC<Props> = ({
             <Input.Password
               placeholder="Password *"
               iconRender={(visible) => (visible ? <FaEye /> : <FaEyeSlash />)}
-              
             />
           </Form.Item>
         </Form>

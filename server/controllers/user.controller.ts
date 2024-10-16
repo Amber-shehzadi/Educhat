@@ -445,7 +445,12 @@ export const updateUserRole = AsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id, role } = req.body;
-      updateUserRoleService(res, id, role);
+      const user = updateUserRoleService(res, id, role);
+      res.status(201).json({
+        success: true,
+        user,
+        message: "User role has been updated successfully",
+      });
     } catch (err: any) {
       return next(new ErrorHandler(err.message, 500));
     }
@@ -456,21 +461,24 @@ export const updateUserRole = AsyncErrors(
 export const deleteUser = AsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.params;
+      const { id } = req.params; // Assuming 'id' is passed in the request parameters
+
+      // Find the user by ID
       const user = await userModel.findById(id);
       if (!user) {
-        next(new ErrorHandler("User not found", 404));
+        return next(new ErrorHandler("Faculty not found", 404));
       }
 
-      await user?.deleteOne({ id });
-      await redis.del(id);
+      // Mark the user as inactive (assuming an 'isActive' field exists)
+      // user. = false;
+      await user.save();
 
       res.status(200).json({
         success: true,
-        message: "User deleted successfully",
+        message: "Faculty has been deactivated successfully",
       });
     } catch (err: any) {
-      return next(new ErrorHandler(err.message, 500));
+      return next(new ErrorHandler(err.message, 400));
     }
   }
 );
@@ -501,6 +509,45 @@ export const addFaculty = AsyncErrors(
     }
   }
 );
+
+export const updateFaculty = AsyncErrors(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params; // Assuming 'id' is passed in the request parameters
+      const { email, name, password } = req.body;
+
+      // Check if the user exists by ID
+      const user = await userModel.findById(id);
+      if (!user) {
+        return next(new ErrorHandler("Faculty not found", 404));
+      }
+
+      // Check if the email is being updated and already exists for another user
+      if (email && email !== user.email) {
+        const isEmailExist = await userModel.findOne({ email });
+        if (isEmailExist) {
+          return next(new ErrorHandler("Email already exists", 400));
+        }
+      }
+
+      // Update the user fields
+      user.name = name || user.name;
+      user.email = email || user.email;
+      if (password) user.password = password; // Update password if provided
+
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        user,
+        message: "Coordinator details updated successfully",
+      });
+    } catch (err: any) {
+      return next(new ErrorHandler(err.message, 400));
+    }
+  }
+);
+
 
 export const addUsers = AsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {

@@ -46,6 +46,14 @@ export const userAPI = apiSlice.injectEndpoints({
         credentials: "include" as const,
       }),
     }),
+    updateFaculty: builder.mutation({
+      query: ({ email, name, password, id }) => ({
+        url: `update-coordinator/${id}`,
+        method: "PUT",
+        body: { email, name, password },
+        credentials: "include" as const,
+      }),
+    }),
 
     createTeacherStudent: builder.mutation({
       query: ({
@@ -128,6 +136,15 @@ export const userAPI = apiSlice.injectEndpoints({
         credentials: "include" as const,
       }),
     }),
+
+    updateRole: builder.mutation({
+      query: ({ userId, role }) => ({
+        url: "/update-user-role",
+        method: "PUT",
+        body: { id: userId, role },
+        credentials: "include" as const,
+      }),
+    }),
   }),
 });
 
@@ -144,4 +161,6 @@ export const {
   useLazyGetFeedBackTeacherQuery,
   useAddFeedbackMutation,
   useLazyGetUserCountQuery,
+  useUpdateRoleMutation,
+  useUpdateFacultyMutation,
 } = userAPI;

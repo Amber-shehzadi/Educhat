@@ -1,25 +1,11 @@
-import { Button, Card, Spin, Tabs, TabsProps } from "antd";
-import { FaPencil } from "react-icons/fa6";
-import CHImage from "../../components/common/CHImage";
-import ProfileImage from "../../components/profile/ProfileImage";
-import { assignAvaatr } from "../../utils/common";
+import { Card, Tabs, TabsProps } from "antd";
 import CoverPicture from "../../components/profile/CoverPicture";
-import { Loading3QuartersOutlined } from "@ant-design/icons";
+import ProfileImage from "../../components/profile/ProfileImage";
 import ResetPasswordFrom from "../../components/profile/ResetPasswordFrom";
 
 const ProfilePage = ({ user }: { user: any }) => {
   console.log(user, "user");
   const items: TabsProps["items"] = [
-    {
-      key: "1",
-      label: "Profile",
-      children: "Profile",
-    },
-    {
-      key: "2",
-      label: "Groups",
-      children: "About",
-    },
     {
       key: "3",
       label: "Password",

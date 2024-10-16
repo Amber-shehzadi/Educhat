@@ -86,7 +86,7 @@ const Todos: React.FC = () => {
     if (data?.status) {
       messageApi.open({
         type: "success",
-        content: "Todo has been dleted  successfully",
+        content: "Todo has been deleted  successfully",
       });
       await getUserTodos({});
     } else {
@@ -97,7 +97,6 @@ const Todos: React.FC = () => {
     }
   };
 
-  console.log(data, "data/////");
   const handleEditTodo = (data: any) => {
     setEditData(data);
     setIsEditModal(true);

@@ -31,5 +31,5 @@ export const updateUserRoleService = async (
   role: string
 ) => {
   const user = await userModel.findByIdAndUpdate(id, { role }, { new: true });
-  res.status(201).json({ success: true, user });
+ return user;
 };

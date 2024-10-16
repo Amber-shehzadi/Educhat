@@ -25,6 +25,7 @@ import { useLazyLogoutQuery } from "../../redux/features/auth/authAPI";
 import { useAppStore } from "../../store";
 import { useLazyGetUserNotificationsQuery } from "../../redux/notifications/notificationAPI";
 import VideoCall from "../Video-call";
+import dayjs from "dayjs";
 
 const Navbar = ({ user }: any) => {
   const {
@@ -102,7 +103,10 @@ const Navbar = ({ user }: any) => {
     {
       key: "2",
       label: (
-        <div className="flex items-center gap-2  text-red-600 " onClick={handleLogout}>
+        <div
+          className="flex items-center gap-2  text-red-600 "
+          onClick={handleLogout}
+        >
           {isLoading ? <LoadingOutlined /> : <FiLogOut />}
           {isLoading ? "Logging out ..." : "Logout"}
         </div>
@@ -113,7 +117,7 @@ const Navbar = ({ user }: any) => {
   useEffect(() => {
     const handleGetUserNotifications = async () => {
       const { data } = await getuserNotifications({});
-      console.log(data, "data");
+      console.log(data, "notification");
       setUserNotifications(data?.notifications);
       setCount(data?.count);
     };
@@ -129,7 +133,7 @@ const Navbar = ({ user }: any) => {
       >
         <div className="shadow-sm h-full flex items-center justify-between px-8">
           <Link className="text-bold text-purple-950 !hover:text" to="/">
-         <strong>EDU CHAT</strong>
+            <strong>EDU CHAT</strong>
           </Link>
           <div className="flex items-center gap-6">
             {/* <Input
@@ -204,16 +208,24 @@ const Navbar = ({ user }: any) => {
             <h1 className="sm:text-xl text-2xl text-black/90 text-balance font-semibold">
               Notifications
             </h1>
-            <div className="flex justify-center items-center gap-2">
+            {/* <div className="flex justify-center items-center gap-2">
               <p>Only show unread</p>
               <Switch defaultChecked size="small" />
-            </div>
+            </div> */}
           </div>
           <Divider />
           {userNotifications?.length
             ? userNotifications?.map((el: any, idx: number) => (
                 <>
-                  <div className="flex w-full justify-between items-center"></div>
+                  <div
+                    className="flex flex-col w-full justify-between items-start"
+                    key={idx}
+                  >
+                    {el?.message}
+                    <small className="text-slate-400">
+                      {dayjs(el?.createdAt)?.format("MMM D, YYYY h:mm A")}
+                    </small>
+                  </div>
                   <Divider />
                 </>
               ))

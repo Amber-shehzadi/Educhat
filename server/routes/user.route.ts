@@ -19,6 +19,7 @@ import {
   submitFeedbackToTeacher,
   updateAccessToken,
   updateCoverPicture,
+  updateFaculty,
   updatePassword,
   updateProfilePicture,
   updateUserInfo,
@@ -41,7 +42,7 @@ userRouter.get(
 
 userRouter.post("/login", loginUser);
 userRouter.post("/register", registerUser);
-userRouter.post("/social-auth", socialAuth);
+// userRouter.post("/social-auth", socialAuth);
 userRouter.post("/activate-user", activateUser);
 
 userRouter.put("/update-user-info", isAuthenticated, updateUserInfo);
@@ -72,6 +73,13 @@ userRouter.post(
   isAuthenticated,
   authorizedRole("admin"),
   addFaculty
+);
+
+userRouter.put(
+  "/update-coordinator/:id",
+  isAuthenticated,
+  authorizedRole("admin"),
+  updateFaculty
 );
 
 userRouter.get(
