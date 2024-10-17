@@ -145,6 +145,15 @@ export const userAPI = apiSlice.injectEndpoints({
         credentials: "include" as const,
       }),
     }),
+
+    verifyUser: builder.mutation({
+      query: ({ userId, isVerified }) => ({
+        url: "/verfiy-user",
+        method: "PUT",
+        body: { id: userId, isVerified },
+        credentials: "include" as const,
+      }),
+    }),
   }),
 });
 
@@ -163,4 +172,5 @@ export const {
   useLazyGetUserCountQuery,
   useUpdateRoleMutation,
   useUpdateFacultyMutation,
+  useVerifyUserMutation,
 } = userAPI;

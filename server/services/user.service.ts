@@ -33,3 +33,12 @@ export const updateUserRoleService = async (
   const user = await userModel.findByIdAndUpdate(id, { role }, { new: true });
  return user;
 };
+
+export const verifyUserService = async (id: string, isVerified: string) => {
+  const user = await userModel.findByIdAndUpdate(
+    id,
+    { isVerified },
+    { new: true }
+  );
+  return user;
+};

@@ -24,6 +24,7 @@ import {
   updateProfilePicture,
   updateUserInfo,
   updateUserRole,
+  verifyUser,
 } from "../controllers/user.controller";
 import { authorizedRole, isAuthenticated } from "../middleware/auth";
 
@@ -59,6 +60,13 @@ userRouter.put(
   isAuthenticated,
   authorizedRole("admin"),
   updateUserRole
+);
+
+userRouter.put(
+  "/verfiy-user",
+  isAuthenticated,
+  authorizedRole("admin"),
+  verifyUser
 );
 
 userRouter.delete(

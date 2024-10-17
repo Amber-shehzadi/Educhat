@@ -11,6 +11,7 @@ import {
   getAllUserService,
   getUserbyId,
   updateUserRoleService,
+  verifyUserService,
 } from "../services/user.service";
 import cloudinary from "cloudinary";
 import ClassModel from "../models/class.model";
@@ -457,6 +458,22 @@ export const updateUserRole = AsyncErrors(
   }
 );
 
+export const verifyUser = AsyncErrors(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id, isVerified } = req.body;
+      const user = verifyUserService(id, isVerified);
+      res.status(201).json({
+        success: true,
+        user,
+        message: "User has been verfied successfully",
+      });
+    } catch (err: any) {
+      return next(new ErrorHandler(err.message, 500));
+    }
+  }
+);
+
 // delete user --- only admin
 export const deleteUser = AsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -548,7 +565,6 @@ export const updateFaculty = AsyncErrors(
   }
 );
 
-
 export const addUsers = AsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -576,12 +592,10 @@ export const getAllFaculties = AsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Find all coordinator users who are verified
-      const faculties = await userModel
-        .find({ role: "coordinator", isVerified: true })
-        .populate({
-          path: "managedClasses", // Populate the managedClasses array with full class details
-          model: "Class", // Reference to Class model
-        });
+      const faculties = await userModel.find({ role: "coordinator" }).populate({
+        path: "managedClasses", // Populate the managedClasses array with full class details
+        model: "Class", // Reference to Class model
+      });
 
       res.status(200).json({
         status: true,
@@ -703,7 +717,7 @@ export const getVerifiedTeachersWithDetails = AsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const teachers = await userModel
-        .find({ role: "teacher", isVerified: true })
+        .find({ role: "teacher" })
         .populate({
           path: "assignedClasses",
           select: "name section description",
@@ -729,7 +743,7 @@ export const getVerifiedStudentsWithDetails = AsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const students = await userModel
-        .find({ role: "student", isVerified: true })
+        .find({ role: "student" })
         .populate({
           path: "enrolledClasses",
           select: "name section description",

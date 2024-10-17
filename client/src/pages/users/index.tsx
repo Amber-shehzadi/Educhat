@@ -26,6 +26,7 @@ import {
   useLazyGetAllStudentsQuery,
   useLazyGetAllteachersQuery,
   useUpdateRoleMutation,
+  useVerifyUserMutation,
 } from "../../redux/user/userAPI";
 import { useSelector } from "react-redux";
 import TeahcerViewModal from "../../components/users/TeahcerViewModal";
@@ -50,6 +51,17 @@ const Users = () => {
     },
   ];
 
+  const verifyItems: MenuProps["items"] = [
+    {
+      key: "verify",
+      label: "Verify",
+    },
+    {
+      key: "not-verify",
+      label: "Not Verify",
+    },
+  ];
+
   const { user } = useSelector((state: any) => state.auth);
   const [messageApi, contextHolder] = message.useMessage();
   const [isEditModal, setIsEditModal] = useState(false);
@@ -61,6 +73,17 @@ const Users = () => {
     updateUserRole,
     { isLoading: roleLoading, isSuccess, isError, error, data: roleData },
   ] = useUpdateRoleMutation();
+
+  const [
+    verifyUser,
+    {
+      isLoading: verifyLoading,
+      isSuccess: verifySuccess,
+      isError: verifyIsError,
+      error: verifyError,
+      data: verifyData,
+    },
+  ] = useVerifyUserMutation();
 
   const [getAllTeachers, { isLoading: teacherLoading }] =
     useLazyGetAllteachersQuery();
@@ -173,6 +196,21 @@ const Users = () => {
                     // />,
                     <Dropdown
                       menu={{
+                        items: verifyItems,
+                        onClick: ({ key }) =>
+                          handleVerifyUser(key, item?._id as string),
+                        selectedKeys: [
+                          item?.isVerified ? "verify" : "not-verify",
+                        ],
+                      }}
+                      trigger={["click"]}
+                      key="ellipsis"
+                    >
+                      {/* <EllipsisOutlined /> */}
+                      <span>Verify</span>
+                    </Dropdown>,
+                    <Dropdown
+                      menu={{
                         items: roleItems,
                         onClick: ({ key }) =>
                           handleUpdateRole(key, item?._id as string),
@@ -194,6 +232,14 @@ const Users = () => {
                     <div className="flex items-center justify-start gap-2 my-2">
                       <h1 className=" text-gray-800 font-semibold">Email:</h1>
                       <p className="truncate">{item?.email}</p>
+                    </div>
+                    <div className="flex items-center justify-start gap-2 my-2">
+                      <h1 className=" text-gray-800 font-semibold">
+                        Verified:
+                      </h1>
+                      <p className="truncate">
+                        {item?.isVerified ? "Yes" : "No"}
+                      </p>
                     </div>
                     <div className="flex items-center justify-start gap-2 my-2">
                       <h1 className=" text-gray-800 font-semibold ">
@@ -250,6 +296,21 @@ const Users = () => {
                     <EyeOutlined key="view" onClick={() => viewData(item)} />,
                     <Dropdown
                       menu={{
+                        items: verifyItems,
+                        onClick: ({ key }) =>
+                          handleVerifyUser(key, item?._id as string),
+                        selectedKeys: [
+                          item?.isVerified ? "verify" : "not-verify",
+                        ],
+                      }}
+                      trigger={["click"]}
+                      key="ellipsis"
+                    >
+                      {/* <EllipsisOutlined /> */}
+                      <span>Verify</span>
+                    </Dropdown>,
+                    <Dropdown
+                      menu={{
                         items: roleItems,
                         onClick: ({ key }) =>
                           handleUpdateRole(key, item?._id as string),
@@ -283,6 +344,14 @@ const Users = () => {
                     <div className="flex items-center justify-start gap-2 my-2">
                       <h1 className=" text-gray-800 font-semibold">Contact:</h1>
                       <p className="truncate">{item?.contact}</p>
+                    </div>
+                    <div className="flex items-center justify-start gap-2 my-2">
+                      <h1 className=" text-gray-800 font-semibold">
+                        Verified:
+                      </h1>
+                      <p className="truncate">
+                        {item?.isVerified ? "Yes" : "No"}
+                      </p>
                     </div>
                     <div className="flex items-center justify-start gap-2 my-2">
                       <h1 className=" text-gray-800 font-semibold ">
@@ -341,6 +410,21 @@ const Users = () => {
                     // />,
                     <Dropdown
                       menu={{
+                        items: verifyItems,
+                        onClick: ({ key }) =>
+                          handleVerifyUser(key, item?._id as string),
+                        selectedKeys: [
+                          item?.isVerified ? "verify" : "not-verify",
+                        ],
+                      }}
+                      trigger={["click"]}
+                      key="ellipsis"
+                    >
+                      {/* <EllipsisOutlined /> */}
+                      <span>Verify</span>
+                    </Dropdown>,
+                    <Dropdown
+                      menu={{
                         items: roleItems,
                         onClick: ({ key }) =>
                           handleUpdateRole(key, item?._id as string),
@@ -374,6 +458,14 @@ const Users = () => {
                     <div className="flex items-center justify-start gap-2 my-2">
                       <h1 className=" text-gray-800 font-semibold">Contact:</h1>
                       <p className="truncate">{item?.contact}</p>
+                    </div>
+                    <div className="flex items-center justify-start gap-2 my-2">
+                      <h1 className=" text-gray-800 font-semibold">
+                        Verified:
+                      </h1>
+                      <p className="truncate">
+                        {item?.isVerified ? "Yes" : "No"}
+                      </p>
                     </div>
                     <div className="flex items-center justify-start gap-2 my-2">
                       <h1 className=" text-gray-800 font-semibold ">
@@ -477,6 +569,13 @@ const Users = () => {
   const handleUpdateRole = async (role: string, userId: string) => {
     await updateUserRole({ userId, role });
   };
+
+  const handleVerifyUser = async (isVerified: string, userId: string) => {
+    await verifyUser({
+      userId,
+      isVerified: isVerified === "verify" ? true : false,
+    });
+  };
   useEffect(() => {
     if (isSuccess) {
       const message = roleData?.message || "";
@@ -503,6 +602,33 @@ const Users = () => {
       });
     }
   }, [isSuccess, error, roleData, messageApi, isError]);
+
+  useEffect(() => {
+    if (verifySuccess) {
+      const message = verifyData?.message || "";
+      messageApi.open({
+        type: "success",
+        content: message,
+      });
+      if (selectedTab === "student") {
+        handleGetAllStudents();
+        return;
+      }
+      if (selectedTab === "coordinator") {
+        handleGETFaculties();
+        return;
+      }
+      handleGetAllTeachers();
+      return;
+    }
+    if (verifyIsError) {
+      const errordata: any = verifyIsError;
+      messageApi.open({
+        type: "error",
+        content: errordata.data.message,
+      });
+    }
+  }, [verifySuccess, verifyError, verifyData, messageApi, verifyIsError]);
 
   return (
     <>
