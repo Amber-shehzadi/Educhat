@@ -19,6 +19,7 @@ import ClassModel from "../models/class.model";
 // <------------------ interfaces ------------------->
 interface IRegistrationRequest {
   name: string;
+  fatherName: string;
   email: string;
   password: string;
   avatar?: string;
@@ -69,13 +70,20 @@ interface IUpdateCoverPicture {
 export const registerUser = AsyncErrors(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { name, email, password, avatar }: IRegistrationRequest = req.body;
+      const {
+        name,
+        email,
+        fatherName,
+        password,
+        avatar,
+      }: IRegistrationRequest = req.body;
       const isEmailExist = await userModel.findOne({ email });
       if (isEmailExist)
         return next(new ErrorHandler("Email already exist", 400));
 
       const user: IRegistrationRequest = {
         name,
+        fatherName,
         email,
         password,
       };
@@ -116,13 +124,14 @@ export const activateUser = AsyncErrors(
       if (newUser.activationCode !== activation_code) {
         return next(new ErrorHandler("Invalid activation code", 400));
       }
-      const { email, name, password } = newUser.user;
+      const { email, fatherName, name, password } = newUser.user;
       const isEmailExist = await userModel.findOne({ email });
       if (isEmailExist) {
         return next(new ErrorHandler("Email already exist", 400));
       }
       const user = await userModel.create({
         name,
+        fatherName,
         email,
         password,
       });

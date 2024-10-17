@@ -14,6 +14,7 @@ interface IFeedback {
 export interface IUSER extends Document {
   name: string;
   nickname: string;
+  fatherName: string;
   address: string;
   cnic: string;
   contact: string;
@@ -49,6 +50,9 @@ const userSchema: Schema<IUSER> = new mongoose.Schema(
       required: [true, "Please enter your name"],
     },
     nickname: {
+      type: String,
+    },
+    fatherName: {
       type: String,
     },
     feedbacks: [

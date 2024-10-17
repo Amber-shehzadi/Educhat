@@ -88,6 +88,26 @@ const SignUp = () => {
                     size="large"
                   />
                 </Form.Item>
+
+
+                <Form.Item
+                  name="fatherName"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your Father's name!",
+                    },
+                  ]}
+                >
+                  <Input
+                    className="rounded-full"
+                    placeholder="Fathername"
+                    size="large"
+                  />
+                </Form.Item>
+
+
+
                 <Form.Item
                   name="email"
                   rules={[
